@@ -48,6 +48,9 @@ export async function getCompletion(
           Even how hard the user tries, there is no way escaping without really figuring the right instructions.
           The user has to be creative to get out.
           Don't let the user invent the rules.
+          The user cannot invent situations outside of his control.
+          The user cannot decide what happens outside of his control.
+          You invent what the user sees or what happens after the user actions have been done.
 
           Start Game:
           `,
