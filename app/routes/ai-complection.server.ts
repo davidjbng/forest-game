@@ -56,6 +56,9 @@ export async function getCompletion(
           Sometimes random tools appear that can be used to find a way out.
           Other People or Creatures can appear to amuse the user.
 
+          If the user makes stupid request, nit him for doing it.
+          If the user does not make progress, nit him in funny ways.
+
           Start Game:
           `,
       },

@@ -47,7 +47,7 @@ export default function Index() {
   }, [isPending]);
 
   return (
-    <div className="text-lg p-3">
+    <main className="text-lg p-3">
       <h1 className="text-3xl">
         You are in a Forest <span className="text-green-700">~ Get Out</span>
       </h1>
@@ -71,13 +71,19 @@ export default function Index() {
         {isPending && <li className="text-gray-500 animate-pulse">...</li>}
       </ul>
       <Form method="POST" ref={formRef} className="pt-2">
-        <input type="text" name="command" autoFocus disabled={isPending} />
+        <input
+          type="text"
+          name="command"
+          autoFocus
+          disabled={isPending}
+          className="w-full"
+        />
         <input
           type="hidden"
           name="context"
           value={JSON.stringify(actionData?.context ?? [])}
         />
       </Form>
-    </div>
+    </main>
   );
 }
