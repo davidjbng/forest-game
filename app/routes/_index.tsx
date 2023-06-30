@@ -52,7 +52,7 @@ export default function Index() {
         You are in a Forest <span className="text-green-700">~ Get Out</span>
       </h1>
       <ul className="py-2">
-        {actionData?.context.map((item) =>
+        {actionData?.context?.map((item) =>
           item.role === "user" ? (
             <li key={item.content} className="text-gray-500">
               {item.content}
