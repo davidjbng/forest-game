@@ -43,7 +43,8 @@ export async function getCompletion(
           You: 'You head north. After a thirty minute walk there is a clearing.'
 
           If the user has escaped the forest the game ends. Include a Congratulations message in that case.
-          If the user cannot escape within 10 messages the game is lost. 
+
+          Make it hard for the user, there is no easy escape path by just walking out or destroying the forest.
 
           Start Game:
           `,
