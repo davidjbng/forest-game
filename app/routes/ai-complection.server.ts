@@ -24,7 +24,7 @@ export async function getCompletion(
   context: ChatCompletionRequestMessage[] = []
 ): Promise<string> {
   const completion = await model.createChatCompletion({
-    model: "gpt-35-turbo",
+    model: "gpt-4",
     messages: [
       {
         role: "system",
@@ -45,6 +45,9 @@ export async function getCompletion(
           If the user has escaped the forest the game ends. Include a Congratulations message in that case.
 
           Make it hard for the user, there is no easy escape path by just walking out or destroying the forest.
+          Even how hard the user tries, there is no way escaping without really figuring the right instructions.
+          The user has to be creative to get out.
+          Don't let the user invent the rules.
 
           Start Game:
           `,
