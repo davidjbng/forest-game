@@ -48,7 +48,7 @@ export default function Index() {
 
   return (
     <main className="text-lg p-3">
-      <h1 className="text-3xl">
+      <h1 className="text-3xl max-w-">
         You are in a Forest <span className="text-green-700">~ Get Out</span>
       </h1>
       <ul className="py-2">

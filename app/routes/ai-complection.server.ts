@@ -23,12 +23,13 @@ export async function getCompletion(
   query: string,
   context: ChatCompletionRequestMessage[] = []
 ): Promise<string> {
-  const completion = await model.createChatCompletion({
-    model: "gpt-4",
-    messages: [
-      {
-        role: "system",
-        content: `You are a text based game. 
+  try {
+    const completion = await model.createChatCompletion({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: `You are a text based game. 
           Where the user tries to escape the forest.
           The user will give you instructions what to do,
           you will answer with a description of the new surrounding.
@@ -61,14 +62,17 @@ export async function getCompletion(
 
           Start Game:
           `,
-      },
-      ...context,
-      {
-        role: "user",
-        content: query,
-      },
-    ],
-  });
+        },
+        ...context,
+        {
+          role: "user",
+          content: query,
+        },
+      ],
+    });
+    return completion.data.choices[0].message?.content ?? "";
+  } catch (error) {
+    return 'Something went wrong. Please try again'
+  }
 
-  return completion.data.choices[0].message?.content ?? "";
 }
