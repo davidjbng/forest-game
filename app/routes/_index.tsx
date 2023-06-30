@@ -6,8 +6,8 @@ import { getCompletion } from "./ai-complection.server";
 
 export const meta: V2_MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Forest ~ Get Out" },
+    { name: "description", content: "A text based escape game" },
   ];
 };
 
@@ -51,7 +51,7 @@ export default function Index() {
       <h1 className="text-3xl">
         You are in a Forest <span className="text-green-700">~ Get Out</span>
       </h1>
-      <ul>
+      <ul className="py-2">
         {actionData?.context.map((item) =>
           item.role === "user" ? (
             <li key={item.content} className="text-gray-500">
