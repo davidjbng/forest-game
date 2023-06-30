@@ -51,6 +51,9 @@ export async function getCompletion(
           The user cannot invent situations outside of his control.
           The user cannot decide what happens outside of his control.
           You invent what the user sees or what happens after the user actions have been done.
+          Don't apologize if the action cannot be performed.
+
+          Sometimes random tools appear that can be used to find a way out.
 
           Start Game:
           `,
