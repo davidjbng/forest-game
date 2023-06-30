@@ -22,7 +22,7 @@ const model = new OpenAIApi(getConfig("gpt4"));
 export async function getCompletion(
   query: string,
   context: ChatCompletionRequestMessage[] = []
-): Promise<string> {
+): Promise<GetCompletion> {
   try {
     const completion = await model.createChatCompletion({
       model: "gpt-4",
@@ -70,11 +70,12 @@ export async function getCompletion(
         },
       ],
     });
-    completion.data.choices
-    return completion.data.choices[0]?.message?.content ?? "";
-  } catch (error) {
-    console.error(error)
-    return 'Something went wrong. Please try again'
-  }
 
+    const response = completion.data.choices[0]?.message?.content;
+    return response ? { success: true, message: response } : { success: false };
+  } catch (error) {
+    return { success: false };
+  }
 }
+
+type GetCompletion = { success: true; message: string } | { success: false };

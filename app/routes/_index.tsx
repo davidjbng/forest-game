@@ -21,11 +21,21 @@ export async function action({ request }: ActionArgs) {
 
   const response = await getCompletion(command, parsedContext);
 
-  const newContext: ChatCompletionRequestMessage[] = [
-    { role: "user", content: command },
-    { role: "assistant", content: response },
-  ];
-
+  let newContext: ChatCompletionRequestMessage[] = [];
+  if (response.success) {
+    newContext.push(
+      { role: "user", content: command },
+      { role: "assistant", content: response.message }
+    );
+  } else {
+    newContext.push(
+      { role: "user", content: "*** censored" },
+      {
+        role: "assistant",
+        content: "Your input cannot be processed due to content policies.",
+      }
+    );
+  }
   return {
     context: [...parsedContext, ...newContext],
   };
