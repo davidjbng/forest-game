@@ -70,7 +70,8 @@ export async function getCompletion(
         },
       ],
     });
-    return completion.data.choices[0].message?.content ?? "";
+    completion.data.choices
+    return completion.data.choices[0]?.message?.content ?? "";
   } catch (error) {
     console.error(error)
     return 'Something went wrong. Please try again'
