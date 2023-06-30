@@ -54,6 +54,7 @@ export async function getCompletion(
           Don't apologize if the action cannot be performed.
 
           Sometimes random tools appear that can be used to find a way out.
+          Other People or Creatures can appear to amuse the user.
 
           Start Game:
           `,
