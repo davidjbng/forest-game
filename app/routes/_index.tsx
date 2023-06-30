@@ -70,7 +70,7 @@ export default function Index() {
         )}
         {isPending && <li className="text-gray-500 animate-pulse">...</li>}
       </ul>
-      <Form method="POST" ref={formRef} className="pt-2">
+      <Form method="POST" ref={formRef} className="pt-2" autoComplete="off">
         <input
           type="text"
           name="command"
