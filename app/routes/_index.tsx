@@ -29,10 +29,10 @@ export async function action({ request }: ActionArgs) {
     );
   } else {
     newContext.push(
-      { role: "user", content: "*** censored" },
+      { role: "user", content: "***" },
       {
         role: "assistant",
-        content: "Your input cannot be processed due to content policies.",
+        content: "Failed to process your command. Please try again.",
       }
     );
   }

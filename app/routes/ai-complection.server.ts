@@ -74,6 +74,7 @@ export async function getCompletion(
     const response = completion.data.choices[0]?.message?.content;
     return response ? { success: true, message: response } : { success: false };
   } catch (error) {
+    console.error(error)
     return { success: false };
   }
 }
