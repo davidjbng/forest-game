@@ -2,7 +2,7 @@ import type { ActionArgs, V2_MetaFunction } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { ChatCompletionRequestMessage } from "openai";
 import { useEffect, useRef } from "react";
-import { getCompletion } from "./ai-complection.server";
+import { getCompletion } from "./.ai-completion.server";
 
 export const meta: V2_MetaFunction = () => {
   return [
