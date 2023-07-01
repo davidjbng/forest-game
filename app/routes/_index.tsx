@@ -57,43 +57,45 @@ export default function Index() {
   }, [isPending]);
 
   return (
-    <main className="text-lg p-3">
-      <h1 className="text-3xl max-w-">
-        You are in a Forest <span className="text-green-700">~ Get Out</span>
-      </h1>
-      <ul className="py-2">
-        {actionData?.context?.map((item) =>
-          item.role === "user" ? (
-            <li key={item.content} className="text-gray-500">
-              {item.content}
+    <main className="text-lg p-3 grid place-items-center">
+      <div className="max-w-[60ch] w-full">
+        <h1 className="text-3xl">
+          You are in a Forest <span className="text-green-700">~ Get Out</span>
+        </h1>
+        <ul className="py-2">
+          {actionData?.context?.map((item) =>
+            item.role === "user" ? (
+              <li key={item.content} className="text-gray-500">
+                {item.content}
+              </li>
+            ) : (
+              <li key={item.content} className="text-green-700">
+                {item.content}
+              </li>
+            )
+          )}
+          {navigation.formData && (
+            <li className="text-gray-500">
+              {navigation.formData.get("command") as string}
             </li>
-          ) : (
-            <li key={item.content} className="text-green-700">
-              {item.content}
-            </li>
-          )
-        )}
-        {navigation.formData && (
-          <li className="text-gray-500">
-            {navigation.formData.get("command") as string}
-          </li>
-        )}
-        {isPending && <li className="text-gray-500 animate-pulse">...</li>}
-      </ul>
-      <Form method="POST" ref={formRef} className="pt-2" autoComplete="off">
-        <input
-          type="text"
-          name="command"
-          autoFocus
-          disabled={isPending}
-          className="w-full"
-        />
-        <input
-          type="hidden"
-          name="context"
-          value={JSON.stringify(actionData?.context ?? [])}
-        />
-      </Form>
+          )}
+          {isPending && <li className="text-gray-500 animate-pulse">...</li>}
+        </ul>
+        <Form method="POST" ref={formRef} className="pt-2" autoComplete="off">
+          <input
+            type="text"
+            name="command"
+            autoFocus
+            disabled={isPending}
+            className="w-full"
+          />
+          <input
+            type="hidden"
+            name="context"
+            value={JSON.stringify(actionData?.context ?? [])}
+          />
+        </Form>
+      </div>
     </main>
   );
 }
