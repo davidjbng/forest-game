@@ -57,7 +57,7 @@ export default function Index() {
   }, [isPending]);
 
   return (
-    <main className="text-lg p-3 grid place-items-center">
+    <main className="text-lg p-3 pt-[20vh] pb-[50vh] grid place-items-center min-h-full">
       <div className="max-w-[60ch] w-full">
         <h1 className="text-3xl">
           You are in a Forest <span className="text-green-700">~ Get Out</span>
@@ -81,7 +81,7 @@ export default function Index() {
           )}
           {isPending && <li className="text-gray-500 animate-pulse">...</li>}
         </ul>
-        <Form method="POST" ref={formRef} className="pt-2" autoComplete="off">
+        <Form method="POST" ref={formRef} className="py-2" autoComplete="off">
           <input
             type="text"
             name="command"
