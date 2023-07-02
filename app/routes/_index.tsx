@@ -47,6 +47,7 @@ export async function action({ request }: ActionArgs) {
 export default function Index() {
   const navigation = useNavigation();
   const formRef = useRef<HTMLFormElement>(null);
+  const lastPanelRef = useRef<HTMLLIElement>(null);
   const actionData = useActionData<typeof action>();
   const isPending =
     navigation.state === "submitting" || navigation.state === "loading";
@@ -55,8 +56,7 @@ export default function Index() {
     if (isPending) {
       formRef.current?.reset();
     } else {
-      formRef.current?.scrollIntoView({ behavior: "smooth" });
-      formRef.current?.command.focus();
+      lastPanelRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [isPending]);
 
@@ -76,57 +76,69 @@ export default function Index() {
     }
   }, [actionData]);
 
-  const messagePairs = toPairs(context);
-
   return (
     <main className="text-lg grid place-items-center min-h-full">
       <div className="max-w-[60ch] w-full">
-        <h1 className="text-3xl absolute top-3">
-          You wake up in a Forest{" "}
-          <span className="text-green-700">~ Get Out</span>
-        </h1>
+        <h1 className="text-3xl px-2 fixed top-3">Forest Game</h1>
         <ul>
-          {messagePairs.map(([first, second], index) => {
-            const isLast = index === messagePairs.length - 1;
-            return (
-              <li
-                key={first.content}
-                className={`min-h-screen flex flex-col pt-[20vh] snap-start snap-normal ${
-                  index % 2 === 0 ? "bg-gray-300" : "bg-amber-100"
-                }`}
-              >
-                <p className="text-gray-500">{first.content}</p>
-                {second && <p className="text-green-700">{second.content}</p>}
-                {isLast && (
-                  <Form
-                    method="POST"
-                    ref={formRef}
-                    className="py-2"
-                    autoComplete="off"
-                  >
-                    <input
-                      type="text"
-                      name="command"
-                      autoFocus
-                      disabled={isPending}
-                      className="w-full"
-                    />
-                    <input
-                      type="hidden"
-                      name="context"
-                      value={JSON.stringify(context)}
-                    />
-                  </Form>
-                )}
-              </li>
-            );
-          })}
-          {/* {navigation.formData && (
-            <li className="text-gray-500">
-              {navigation.formData.get("command") as string}
-            </li>
+          {context.length ? (
+            toPairs(context).map(([first, second], index, arr) => {
+              const isLast = index === arr.length - 1;
+              return (
+                <li
+                  key={first.content + (second?.content ?? "")}
+                  ref={isLast ? lastPanelRef : undefined}
+                  className={`min-h-screen flex flex-col pt-[20vh] px-2 snap-start snap-normal ${
+                    index % 2 === 0 ? "bg-gray-300" : "bg-amber-100"
+                  }`}
+                >
+                  <p className="text-gray-500">{first.content}</p>
+                  {second && <p className="text-green-700">{second.content}</p>}
+                  {isLast && (
+                    <Form
+                      method="POST"
+                      ref={formRef}
+                      className="py-2 mt-auto"
+                      autoComplete="off"
+                    >
+                      <input
+                        type="text"
+                        name="command"
+                        autoFocus
+                        disabled={isPending}
+                        className="w-full"
+                      />
+                      <input
+                        type="hidden"
+                        name="context"
+                        value={JSON.stringify(context)}
+                      />
+                    </Form>
+                  )}
+                </li>
+              );
+            })
+          ) : (
+            <Form
+              method="POST"
+              ref={formRef}
+              className="py-2 mt-auto"
+              autoComplete="off"
+            >
+              <input
+                type="text"
+                name="command"
+                autoFocus
+                disabled={isPending}
+                className="w-full"
+              />
+              <input
+                type="hidden"
+                name="context"
+                value={JSON.stringify(context)}
+              />
+            </Form>
           )}
-          {isPending && <li className="text-gray-500 animate-pulse">...</li>} */}
         </ul>
       </div>
     </main>
