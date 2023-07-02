@@ -72,42 +72,72 @@ export default function Index() {
     }
   }, [actionData]);
 
+  const messagePairs = toPairs(context);
+
   return (
     <main className="text-lg p-3 pt-[20vh] pb-[50vh] grid place-items-center min-h-full">
       <div className="max-w-[60ch] w-full">
-        <h1 className="text-3xl">
-          You are in a Forest <span className="text-green-700">~ Get Out</span>
+        <h1 className="text-3xl sticky top-3">
+          You wake up in a Forest{" "}
+          <span className="text-green-700">~ Get Out</span>
         </h1>
-        <ul className="py-2">
-          {context?.map((item) =>
-            item.role === "user" ? (
-              <li key={item.content} className="text-gray-500">
-                {item.content}
+        <ul className="py-2 snap-x">
+          {messagePairs.map(([first, second], index) => {
+            const isLast = index === messagePairs.length - 1;
+            return (
+              <li
+                key={first.content}
+                className="min-h-screen snap-start snap-normal"
+              >
+                <p className="text-gray-500">{first.content}</p>
+                {second && <p className="text-green-700">{second.content}</p>}
+                {isLast && (
+                  <Form
+                    method="POST"
+                    ref={formRef}
+                    className="py-2"
+                    autoComplete="off"
+                  >
+                    <input
+                      type="text"
+                      name="command"
+                      autoFocus
+                      disabled={isPending}
+                      className="w-full"
+                    />
+                    <input
+                      type="hidden"
+                      name="context"
+                      value={JSON.stringify(context)}
+                    />
+                  </Form>
+                )}
               </li>
-            ) : (
-              <li key={item.content} className="text-green-700">
-                {item.content}
-              </li>
-            )
-          )}
-          {navigation.formData && (
+            );
+          })}
+          {/* {navigation.formData && (
             <li className="text-gray-500">
               {navigation.formData.get("command") as string}
             </li>
           )}
-          {isPending && <li className="text-gray-500 animate-pulse">...</li>}
+          {isPending && <li className="text-gray-500 animate-pulse">...</li>} */}
         </ul>
-        <Form method="POST" ref={formRef} className="py-2" autoComplete="off">
-          <input
-            type="text"
-            name="command"
-            autoFocus
-            disabled={isPending}
-            className="w-full"
-          />
-          <input type="hidden" name="context" value={JSON.stringify(context)} />
-        </Form>
       </div>
     </main>
   );
+}
+
+function* chunked<T>(inputArray: T[], chunkSize: number): Generator<T[]> {
+  for (
+    let index = 0;
+    index + chunkSize <= inputArray.length;
+    index += chunkSize
+  ) {
+    yield inputArray.slice(index, index + chunkSize);
+  }
+}
+
+function toPairs<T>(inputArray: T[]): [T, T | undefined][] {
+  //compute the entire sequence of windows into an array
+  return Array.from(chunked(inputArray, 2)) as [T, T | undefined][];
 }
