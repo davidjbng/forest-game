@@ -1,16 +1,17 @@
 import OpenAI from "openai";
 
-export type ChatCompletionMesssage =
+export type ChatCompletionMessage =
   OpenAI.Chat.Completions.CompletionCreateParams.CreateChatCompletionRequestNonStreaming.Message;
 
 export async function getCompletion(
   query: string,
-  context: ChatCompletionMesssage[] = []
-): Promise<GetCompletion> {
+  context: ChatCompletionMessage[] = []
+) {
   try {
     const model = new OpenAI();
-    const completion = await model.chat.completions.create({
+    const response = await model.chat.completions.create({
       model: "gpt-3.5-turbo-0613",
+      stream: true,
       messages: [
         {
           role: "system",
@@ -56,12 +57,11 @@ export async function getCompletion(
       ],
     });
 
-    const response = completion.choices[0]?.message?.content;
-    return response ? { success: true, message: response } : { success: false };
+    return response
+      ? ({ success: true, message: response } as const)
+      : ({ success: false } as const);
   } catch (error) {
     console.error(error);
-    return { success: false };
+    return { success: false } as const;
   }
 }
-
-type GetCompletion = { success: true; message: string } | { success: false };

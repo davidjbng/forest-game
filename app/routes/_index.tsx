@@ -1,7 +1,9 @@
-import type { V2_MetaFunction, ActionArgs } from "@remix-run/node";
-import { useNavigation, useActionData, Form } from "@remix-run/react";
-import { useRef, useEffect } from "react";
-import { getCompletion, type ChatCompletionMesssage } from "./.ai-completion.server";
+import { json, type ActionArgs, type V2_MetaFunction } from "@remix-run/node";
+import { useNavigation, Form, useSubmit } from "@remix-run/react";
+import type { ChatCompletionChunk } from "openai/resources/chat";
+import { useEffect, useState } from "react";
+import { type ChatCompletionMessage } from "~/completion.server";
+import { dispatchCommand } from "~/events.server";
 
 export const meta: V2_MetaFunction = () => {
   return [
@@ -14,46 +16,71 @@ export async function action({ request }: ActionArgs) {
   const data = await request.formData();
 
   const command = data.get("command") as string;
-  const parsedContext = JSON.parse(
-    data.get("context") as string
-  ) as ChatCompletionMesssage[];
+  const parsedContext: ChatCompletionMessage[] = JSON.parse(
+    (data.get("context") as string) ?? "[]"
+  );
 
-  const response = await getCompletion(command, parsedContext);
+  dispatchCommand(command, parsedContext);
 
-  let newContext: ChatCompletionMesssage[] = [];
-  if (response.success) {
-    newContext.push(
-      { role: "user", content: command },
-      { role: "assistant", content: response.message }
-    );
-  } else {
-    newContext.push(
-      { role: "user", content: "***" },
-      {
-        role: "assistant",
-        content: "Failed to process your command. Please try again.",
+  return json(null, { status: 202 });
+}
+
+function useChatCompletionStream() {
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const eventSource = new EventSource(`/forest/chat`);
+    const concatMessage = (event: MessageEvent) => {
+      try {
+        const chunk = JSON.parse(event.data) as ChatCompletionChunk;
+        console.log("chunk", chunk);
+        const message = chunk.choices[0]?.delta?.content;
+        if (message && chunk.choices[0]?.finish_reason == null) {
+          setMessage((m) => m.concat(message));
+        }
+      } catch (e) {
+        console.error(e);
       }
-    );
-  }
-  return {
-    context: [...parsedContext, ...newContext],
-  };
+    };
+    eventSource.addEventListener("message", concatMessage);
+
+    return () => {
+      eventSource.close();
+      eventSource.removeEventListener("message", concatMessage);
+    };
+  }, []);
+
+  return { message, resetMessage: () => setMessage("") };
 }
 
 export default function Index() {
   const navigation = useNavigation();
-  const formRef = useRef<HTMLFormElement>(null);
-  const actionData = useActionData<typeof action>();
   const isPending =
     navigation.state === "submitting" || navigation.state === "loading";
+  const { message, resetMessage } = useChatCompletionStream();
+  const [context, setContext] = useState<
+    Array<ChatCompletionMessage & { id: string }>
+  >([]);
+  const submit = useSubmit();
 
-  useEffect(() => {
-    if (isPending) {
-      formRef.current?.reset();
-    } else {
-      formRef.current?.command.focus();
-    }
-  }, [isPending]);
+  function submitCommand(form: HTMLFormElement) {
+    const formData = new FormData(form);
+    console.log("submitting", formData.get("command"));
+    console.log("form", form);
+    submit(form, { method: "post" });
+    form.reset();
+    setContext((current) =>
+      current.concat(
+        { role: "assistant", content: message, id: crypto.randomUUID() },
+        {
+          role: "user",
+          content: formData.get("command") as string,
+          id: crypto.randomUUID(),
+        }
+      )
+    );
+    resetMessage();
+  }
 
   return (
     <main className="text-lg p-3 pt-[20vh] pb-[50vh] grid place-items-center min-h-full">
@@ -62,36 +89,41 @@ export default function Index() {
           You are in a Forest <span className="text-green-700">~ Get Out</span>
         </h1>
         <ul className="py-2">
-          {actionData?.context?.map((item) =>
+          {context.map((item) =>
             item.role === "user" ? (
-              <li key={item.content} className="text-gray-500">
+              <li key={item.id} className="text-gray-500">
                 {item.content}
               </li>
             ) : (
-              <li key={item.content} className="text-green-700">
+              <li key={item.id} className="text-green-700">
                 {item.content}
               </li>
             )
           )}
-          {navigation.formData && (
-            <li className="text-gray-500">
-              {navigation.formData.get("command") as string}
-            </li>
-          )}
-          {isPending && <li className="text-gray-500 animate-pulse">...</li>}
+          {message && <li className="text-green-700">{message}</li>}
         </ul>
-        <Form method="POST" ref={formRef} className="py-2" autoComplete="off">
+        <Form
+          onSubmit={(event) => {
+            event.preventDefault();
+            submitCommand(event.currentTarget);
+          }}
+          className="py-2"
+          autoComplete="off"
+        >
           <input
             type="text"
             name="command"
             autoFocus
             disabled={isPending}
             className="w-full"
+            required
           />
           <input
             type="hidden"
             name="context"
-            value={JSON.stringify(actionData?.context ?? [])}
+            value={JSON.stringify(
+              context.map((c) => ({ role: c.role, content: c.content }))
+            )}
           />
         </Form>
       </div>
