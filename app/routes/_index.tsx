@@ -5,8 +5,12 @@ import { getCompletion, ChatCompletionMesssage } from "./.ai-completion.server";
 
 export const meta: V2_MetaFunction = () => {
   return [
-    { title: "Forest ~ Get Out" },
-    { name: "description", content: "A text based escape game" },
+    { title: "Forest Game" },
+    {
+      name: "description",
+      content:
+        "You wake up in a forest ~ Get Out. A text based adventure game.",
+    },
   ];
 };
 
@@ -75,19 +79,21 @@ export default function Index() {
   const messagePairs = toPairs(context);
 
   return (
-    <main className="text-lg p-3 pt-[20vh] pb-[50vh] grid place-items-center min-h-full">
+    <main className="text-lg grid place-items-center min-h-full">
       <div className="max-w-[60ch] w-full">
-        <h1 className="text-3xl sticky top-3">
+        <h1 className="text-3xl absolute top-3">
           You wake up in a Forest{" "}
           <span className="text-green-700">~ Get Out</span>
         </h1>
-        <ul className="py-2 snap-x">
+        <ul>
           {messagePairs.map(([first, second], index) => {
             const isLast = index === messagePairs.length - 1;
             return (
               <li
                 key={first.content}
-                className="min-h-screen snap-start snap-normal"
+                className={`min-h-screen flex flex-col pt-[20vh] snap-start snap-normal ${
+                  index % 2 === 0 ? "bg-gray-300" : "bg-amber-100"
+                }`}
               >
                 <p className="text-gray-500">{first.content}</p>
                 {second && <p className="text-green-700">{second.content}</p>}
