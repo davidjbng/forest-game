@@ -84,15 +84,15 @@ export default function Index() {
   return (
     <main className="text-lg grid place-items-center">
       <div className="max-w-[60ch] w-full">
-        <header className="fixed left-0 right-0 top-3 px-2 flex justify-between">
-          <h1 className="text-3xl">Forest Game</h1>
-          <button className="ml-auto" onClick={reset}>
-            Reset
-          </button>
-        </header>
-        <ul className='h-full'>
+        <ul className="h-full">
           {context.length === 0 ? (
-            <li className="h-s-screen flex flex-col pt-[20vh] px-2 bg-gray-300">
+            <li className="relative h-d-screen flex flex-col pt-[20vh] px-2 bg-gray-300">
+              <header className="absolute left-0 right-0 top-3 px-2 flex justify-between">
+                <h1 className="text-3xl">Forest Game</h1>
+                <button className="ml-auto" onClick={reset}>
+                  Reset
+                </button>
+              </header>
               <Form
                 method="POST"
                 ref={formRef}
@@ -120,10 +120,16 @@ export default function Index() {
                 <li
                   key={first.content + (second?.content ?? "")}
                   ref={isLast ? lastPanelRef : undefined}
-                  className={`h-s-screen flex flex-col pt-[20vh] px-2 snap-start snap-normal ${
+                  className={`h-d-screen relative flex flex-col pt-[20vh] px-2 snap-start snap-normal ${
                     index % 2 === 0 ? "bg-gray-300" : "bg-amber-100"
                   }`}
                 >
+                  <header className="absolute left-0 right-0 top-3 px-2 flex justify-between">
+                    <h1 className="text-3xl">Forest Game</h1>
+                    <button className="ml-auto" onClick={reset}>
+                      Reset
+                    </button>
+                  </header>
                   <p className="text-gray-500">{first.content}</p>
                   {second && <p className="text-green-700">{second.content}</p>}
                   {isLast && (

@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 @layer utilities {
-  .h-s-screen {
+  .h-d-screen {
     height: 100vh;
     /* progressive enhancement */
-    height: 100svh;
+    height: 100dvh;
   }
 }
