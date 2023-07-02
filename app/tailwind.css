@@ -1,11 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer utilities {
-  .h-d-screen {
-    height: 100vh;
-    /* progressive enhancement */
-    height: 100dvh;
-  }
-}

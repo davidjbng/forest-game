@@ -56,7 +56,7 @@ export default function Index() {
     if (isPending) {
       formRef.current?.reset();
     } else {
-      // lastPanelRef.current?.scrollIntoView({ behavior: "smooth" });
+      lastPanelRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [isPending]);
 
@@ -86,7 +86,7 @@ export default function Index() {
       <div className="max-w-[60ch] w-full">
         <ul className="h-full">
           {context.length === 0 ? (
-            <li className="relative h-d-screen flex flex-col pt-[20vh] px-2 bg-gray-300">
+            <li className="relative h-screen flex flex-col pt-[20vh] px-2 bg-gray-300">
               <header className="absolute left-0 right-0 top-3 px-2 flex justify-between">
                 <h1 className="text-3xl">Forest Game</h1>
                 <button className="ml-auto" onClick={reset}>
@@ -96,7 +96,7 @@ export default function Index() {
               <Form
                 method="POST"
                 ref={formRef}
-                className="py-2 mt-auto"
+                className="py-2"
                 autoComplete="off"
               >
                 <input
@@ -120,7 +120,7 @@ export default function Index() {
                 <li
                   key={first.content + (second?.content ?? "")}
                   ref={isLast ? lastPanelRef : undefined}
-                  className={`h-d-screen relative flex flex-col pt-[20vh] px-2 snap-start snap-normal ${
+                  className={`h-screen relative flex flex-col pt-[20vh] px-2 snap-start snap-normal ${
                     index % 2 === 0 ? "bg-gray-300" : "bg-amber-100"
                   }`}
                 >
@@ -136,7 +136,7 @@ export default function Index() {
                     <Form
                       method="POST"
                       ref={formRef}
-                      className="py-2 mt-auto"
+                      className="py-2 mt-4"
                       autoComplete="off"
                     >
                       <input
