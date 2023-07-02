@@ -1,7 +1,10 @@
-import type { ActionArgs, V2_MetaFunction } from "@remix-run/node";
+import {
+  type ActionArgs,
+  type V2_MetaFunction,
+} from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { ChatCompletionRequestMessage } from "openai";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getCompletion } from "./.ai-completion.server";
 
 export const meta: V2_MetaFunction = () => {
@@ -52,9 +55,26 @@ export default function Index() {
     if (isPending) {
       formRef.current?.reset();
     } else {
+      formRef.current?.scrollIntoView({ behavior: "smooth" });
       formRef.current?.command.focus();
     }
   }, [isPending]);
+
+  const [context, setContext] = useState<ChatCompletionRequestMessage[]>(
+    actionData?.context ?? []
+  );
+
+  useEffect(() => {
+    if (actionData?.context) {
+      setContext(actionData.context);
+      window.sessionStorage.setItem(
+        "context",
+        JSON.stringify(actionData.context)
+      );
+    } else if (window?.sessionStorage.getItem("context")) {
+      setContext(JSON.parse(window.sessionStorage.getItem("context") ?? "[]"));
+    }
+  }, [actionData]);
 
   return (
     <main className="text-lg p-3 pt-[20vh] pb-[50vh] grid place-items-center min-h-full">
@@ -63,7 +83,7 @@ export default function Index() {
           You are in a Forest <span className="text-green-700">~ Get Out</span>
         </h1>
         <ul className="py-2">
-          {actionData?.context?.map((item) =>
+          {context?.map((item) =>
             item.role === "user" ? (
               <li key={item.content} className="text-gray-500">
                 {item.content}
@@ -89,11 +109,7 @@ export default function Index() {
             disabled={isPending}
             className="w-full"
           />
-          <input
-            type="hidden"
-            name="context"
-            value={JSON.stringify(actionData?.context ?? [])}
-          />
+          <input type="hidden" name="context" value={JSON.stringify(context)} />
         </Form>
       </div>
     </main>
