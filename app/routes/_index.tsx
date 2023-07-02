@@ -1,11 +1,7 @@
-import {
-  type ActionArgs,
-  type V2_MetaFunction,
-} from "@remix-run/node";
+import { type ActionArgs, type V2_MetaFunction } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { ChatCompletionRequestMessage } from "openai";
 import { useEffect, useRef, useState } from "react";
-import { getCompletion } from "./.ai-completion.server";
+import { getCompletion, ChatCompletionMesssage } from "./.ai-completion.server";
 
 export const meta: V2_MetaFunction = () => {
   return [
@@ -20,11 +16,11 @@ export async function action({ request }: ActionArgs) {
   const command = data.get("command") as string;
   const parsedContext = JSON.parse(
     data.get("context") as string
-  ) as ChatCompletionRequestMessage[];
+  ) as ChatCompletionMesssage[];
 
   const response = await getCompletion(command, parsedContext);
 
-  let newContext: ChatCompletionRequestMessage[] = [];
+  let newContext: ChatCompletionMesssage[] = [];
   if (response.success) {
     newContext.push(
       { role: "user", content: command },
@@ -60,7 +56,7 @@ export default function Index() {
     }
   }, [isPending]);
 
-  const [context, setContext] = useState<ChatCompletionRequestMessage[]>(
+  const [context, setContext] = useState<ChatCompletionMesssage[]>(
     actionData?.context ?? []
   );
 

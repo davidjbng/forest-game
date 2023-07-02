@@ -1,31 +1,16 @@
-import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 
-const apiKey = process.env.API_KEY;
-
-function getConfig(model: string) {
-  return new Configuration({
-    apiKey,
-    basePath: `https://lise-openai-gpt4.openai.azure.com/openai/deployments/${model}`,
-    baseOptions: {
-      headers: {
-        "api-key": apiKey,
-      },
-      params: {
-        "api-version": "2023-03-15-preview",
-      },
-    },
-  });
-}
-
-const model = new OpenAIApi(getConfig("gpt4"));
+export type ChatCompletionMesssage =
+  OpenAI.Chat.Completions.CompletionCreateParams.CreateChatCompletionRequestNonStreaming.Message;
 
 export async function getCompletion(
   query: string,
-  context: ChatCompletionRequestMessage[] = []
+  context: ChatCompletionMesssage[] = []
 ): Promise<GetCompletion> {
   try {
-    const completion = await model.createChatCompletion({
-      model: "gpt-4",
+    const model = new OpenAI();
+    const completion = await model.chat.completions.create({
+      model: "gpt-3.5-turbo-0613",
       messages: [
         {
           role: "system",
@@ -71,10 +56,10 @@ export async function getCompletion(
       ],
     });
 
-    const response = completion.data.choices[0]?.message?.content;
+    const response = completion.choices[0]?.message?.content;
     return response ? { success: true, message: response } : { success: false };
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return { success: false };
   }
 }
