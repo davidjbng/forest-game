@@ -23,14 +23,14 @@ export async function loader({ request }: LoaderArgs) {
           for await (const chunk of completion.message) {
             console.log("chunk", chunk);
             console.log("message", chunk?.choices?.[0]?.delta?.content);
-            // if (request.signal.aborted) {
-            //   completion.message.controller.abort();
-            //   // controller.close();
-            //   return;
-            // }
+            if (request.signal.aborted) {
+              completion.message.controller.abort();
+              return;
+            }
             controller.enqueue(encoder.encode("event: message\n"));
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
           }
+          controller.close()
         }
 
         let closed = false;

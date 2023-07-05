@@ -25,11 +25,11 @@ export async function action({ request }: ActionArgs) {
   return json(null, { status: 202 });
 }
 
-function useChatCompletionStream() {
+function useChatCompletionStream(key: number) {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const eventSource = new EventSource(`/forest/chat`);
+    const eventSource = new EventSource("/forest/chat");
     const concatMessage = (event: MessageEvent) => {
       try {
         const chunk = JSON.parse(event.data) as ChatCompletionChunk;
@@ -37,6 +37,8 @@ function useChatCompletionStream() {
         const message = chunk.choices[0]?.delta?.content;
         if (message && chunk.choices[0]?.finish_reason == null) {
           setMessage((m) => m.concat(message));
+        } else if (chunk.choices[0]?.finish_reason === "stop") {
+          eventSource.close();
         }
       } catch (e) {
         console.error(e);
@@ -48,7 +50,7 @@ function useChatCompletionStream() {
       eventSource.close();
       eventSource.removeEventListener("message", concatMessage);
     };
-  }, []);
+  }, [key]);
 
   return { message, resetMessage: () => setMessage("") };
 }
@@ -57,16 +59,17 @@ export default function Index() {
   const navigation = useNavigation();
   const isPending =
     navigation.state === "submitting" || navigation.state === "loading";
-  const { message, resetMessage } = useChatCompletionStream();
+
+  const [key, setKey] = useState(0);
+  const { message, resetMessage } = useChatCompletionStream(key);
   const [context, setContext] = useState<
     Array<ChatCompletionMessage & { id: string }>
   >([]);
   const submit = useSubmit();
 
   function submitCommand(form: HTMLFormElement) {
+    setKey((k) => k + 1);
     const formData = new FormData(form);
-    console.log("submitting", formData.get("command"));
-    console.log("form", form);
     submit(form, { method: "post" });
     form.reset();
     setContext((current) =>
