@@ -1,7 +1,13 @@
 import { json, type ActionArgs, type V2_MetaFunction } from "@remix-run/node";
 import { useNavigation, Form, useSubmit } from "@remix-run/react";
 import type { ChatCompletionChunk } from "openai/resources/chat";
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useInsertionEffect,
+  useRef,
+  useState,
+} from "react";
 import { type ChatCompletionMessage } from "~/completion.server";
 import { dispatchCommand } from "~/events.server";
 
@@ -25,7 +31,7 @@ export async function action({ request }: ActionArgs) {
   return json(null, { status: 202 });
 }
 
-function useChatCompletionStream(key: number) {
+function useChatCompletionStream(key: number, onMessageComplete?: () => void) {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -33,12 +39,12 @@ function useChatCompletionStream(key: number) {
     const concatMessage = (event: MessageEvent) => {
       try {
         const chunk = JSON.parse(event.data) as ChatCompletionChunk;
-        console.log("chunk", chunk);
-        const message = chunk.choices[0]?.delta?.content;
-        if (message && chunk.choices[0]?.finish_reason == null) {
-          setMessage((m) => m.concat(message));
+        const content = chunk.choices[0]?.delta?.content;
+        if (content && chunk.choices[0]?.finish_reason == null) {
+          setMessage((m) => m.concat(content));
         } else if (chunk.choices[0]?.finish_reason === "stop") {
           eventSource.close();
+          onMessageComplete?.();
         }
       } catch (e) {
         console.error(e);
@@ -50,21 +56,28 @@ function useChatCompletionStream(key: number) {
       eventSource.close();
       eventSource.removeEventListener("message", concatMessage);
     };
-  }, [key]);
+  }, [key, onMessageComplete]);
 
   return { message, resetMessage: () => setMessage("") };
 }
+
+type Context = Array<ChatCompletionMessage & { id: string }>;
 
 export default function Index() {
   const navigation = useNavigation();
   const isPending =
     navigation.state === "submitting" || navigation.state === "loading";
-
   const [key, setKey] = useState(0);
-  const { message, resetMessage } = useChatCompletionStream(key);
-  const [context, setContext] = useState<
-    Array<ChatCompletionMessage & { id: string }>
-  >([]);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const onMessageComplete = useEffectEvent(() => {
+    console.log("message complete", message);
+    setIsStreaming(false);
+  });
+  const { message, resetMessage } = useChatCompletionStream(
+    key,
+    onMessageComplete
+  );
+  const [context, setContext] = useState<Context>([]);
   const submit = useSubmit();
 
   function submitCommand(form: HTMLFormElement) {
@@ -72,16 +85,23 @@ export default function Index() {
     const formData = new FormData(form);
     submit(form, { method: "post" });
     form.reset();
+    setIsStreaming(true);
     setContext((current) =>
-      current.concat(
-        { role: "assistant", content: message, id: crypto.randomUUID() },
-        {
-          role: "user",
-          content: formData.get("command") as string,
-          id: crypto.randomUUID(),
-        }
-      )
+      current.concat({
+        role: "user",
+        content: formData.get("command") as string,
+        id: crypto.randomUUID(),
+      })
     );
+    if (message) {
+      setContext((current) =>
+        current.concat({
+          role: "assistant",
+          content: message,
+          id: crypto.randomUUID(),
+        })
+      );
+    }
     resetMessage();
   }
 
@@ -117,7 +137,7 @@ export default function Index() {
             type="text"
             name="command"
             autoFocus
-            disabled={isPending}
+            disabled={isPending || isStreaming}
             className="w-full"
             required
           />
@@ -132,4 +152,16 @@ export default function Index() {
       </div>
     </main>
   );
+}
+
+// polyfill until useEffectEvent is released
+export function useEffectEvent(fn: (...args: any[]) => void) {
+  const ref = useRef<(...args: any[]) => void>();
+  useInsertionEffect(() => {
+    ref.current = fn;
+  }, [fn]);
+  return useCallback((...args: any[]) => {
+    const f = ref.current;
+    return f?.(...args);
+  }, []);
 }
