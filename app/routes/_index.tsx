@@ -86,13 +86,6 @@ export default function Index() {
     submit(form, { method: "post" });
     form.reset();
     setIsStreaming(true);
-    setContext((current) =>
-      current.concat({
-        role: "user",
-        content: formData.get("command") as string,
-        id: crypto.randomUUID(),
-      })
-    );
     if (message) {
       setContext((current) =>
         current.concat({
@@ -102,6 +95,13 @@ export default function Index() {
         })
       );
     }
+    setContext((current) =>
+      current.concat({
+        role: "user",
+        content: formData.get("command") as string,
+        id: crypto.randomUUID(),
+      })
+    );
     resetMessage();
   }
 
