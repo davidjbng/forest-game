@@ -31,7 +31,7 @@ export async function action({ request }: ActionArgs) {
   return json(null, { status: 202 });
 }
 
-function useChatCompletionStream(key: number, onMessageComplete?: () => void) {
+function useChatCompletionStream(onMessageComplete?: () => void) {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -43,7 +43,6 @@ function useChatCompletionStream(key: number, onMessageComplete?: () => void) {
         if (content && chunk.choices[0]?.finish_reason == null) {
           setMessage((m) => m.concat(content));
         } else if (chunk.choices[0]?.finish_reason === "stop") {
-          eventSource.close();
           onMessageComplete?.();
         }
       } catch (e) {
@@ -56,7 +55,7 @@ function useChatCompletionStream(key: number, onMessageComplete?: () => void) {
       eventSource.close();
       eventSource.removeEventListener("message", concatMessage);
     };
-  }, [key, onMessageComplete]);
+  }, [onMessageComplete]);
 
   return { message, resetMessage: () => setMessage("") };
 }
@@ -67,21 +66,16 @@ export default function Index() {
   const navigation = useNavigation();
   const isPending =
     navigation.state === "submitting" || navigation.state === "loading";
-  const [key, setKey] = useState(0);
   const [isStreaming, setIsStreaming] = useState(false);
   const onMessageComplete = useEffectEvent(() => {
     console.log("message complete", message);
     setIsStreaming(false);
   });
-  const { message, resetMessage } = useChatCompletionStream(
-    key,
-    onMessageComplete
-  );
+  const { message, resetMessage } = useChatCompletionStream(onMessageComplete);
   const [context, setContext] = useState<Context>([]);
   const submit = useSubmit();
 
   function submitCommand(form: HTMLFormElement) {
-    setKey((k) => k + 1);
     const formData = new FormData(form);
     submit(form, { method: "post" });
     form.reset();
