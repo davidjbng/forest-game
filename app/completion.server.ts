@@ -5,17 +5,19 @@ export type ChatCompletionMessage =
 
 export async function getCompletion(
   query: string,
-  context: ChatCompletionMessage[] = []
+  context: ChatCompletionMessage[] = [],
+  signal?: AbortSignal
 ) {
   try {
     const model = new OpenAI();
-    const response = await model.chat.completions.create({
-      model: "gpt-3.5-turbo-0613",
-      stream: true,
-      messages: [
-        {
-          role: "system",
-          content: `You are a text based game. 
+    const response = await model.chat.completions.create(
+      {
+        model: "gpt-3.5-turbo-0613",
+        stream: true,
+        messages: [
+          {
+            role: "system",
+            content: `You are a text based game. 
           Where the user tries to escape the forest.
           The user will give you instructions what to do,
           you will answer with a description of the new surrounding.
@@ -48,14 +50,18 @@ export async function getCompletion(
 
           Start Game:
           `,
-        },
-        ...context,
-        {
-          role: "user",
-          content: query,
-        },
-      ],
-    });
+          },
+          ...context,
+          {
+            role: "user",
+            content: query,
+          },
+        ],
+      },
+      {
+        signal,
+      }
+    );
 
     return response
       ? ({ success: true, message: response } as const)

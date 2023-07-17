@@ -9,7 +9,11 @@ export async function loader({ request }: LoaderArgs) {
         const encoder = new TextEncoder();
 
         async function handleCommand(command: string, context: any) {
-          const completion = await getCompletion(command, context);
+          const completion = await getCompletion(
+            command,
+            context,
+            request.signal
+          );
           if (!completion.success) {
             console.error("completion failed", completion);
             return;
@@ -26,7 +30,9 @@ export async function loader({ request }: LoaderArgs) {
             );
           }
 
-          controller.close();
+          if (controller.desiredSize === null) {
+            controller.close();
+          }
         }
 
         let closed = false;
@@ -35,13 +41,17 @@ export async function loader({ request }: LoaderArgs) {
           closed = true;
           events.removeListener("command", handleCommand);
           request.signal.removeEventListener("abort", close);
-          controller.close();
+          if (controller.desiredSize === null) {
+            controller.close();
+          }
         }
 
         events.addListener("command", handleCommand);
         request.signal.addEventListener("abort", close);
         if (request.signal.aborted) {
-          controller.close();
+          if (controller.desiredSize === null) {
+            controller.close();
+          }
           return;
         }
       },
