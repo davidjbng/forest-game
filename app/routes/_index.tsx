@@ -122,7 +122,7 @@ export default function Index() {
               </li>
             )
           )}
-          {message && <li className="text-green-700">{message}</li>}
+          {message && <StreamedMessage message={message} />}
         </ul>
         <Form
           onSubmit={(event) => {
@@ -152,6 +152,15 @@ export default function Index() {
       </div>
     </main>
   );
+}
+
+function StreamedMessage({ message }: { message: string }) {
+  const ref = useRef<HTMLLIElement>(null);
+  useEffect(() => {
+    ref.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  return <li ref={ref} className="text-green-700">{message}</li>;
 }
 
 // polyfill until useEffectEvent is released
