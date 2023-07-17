@@ -63,14 +63,19 @@ function useChatCompletionStream(onMessageComplete?: () => void) {
 type Context = Array<ChatCompletionMessage & { id: string }>;
 
 export default function Index() {
+  const inputRef = useRef<HTMLInputElement>(null);
   const navigation = useNavigation();
   const isPending =
     navigation.state === "submitting" || navigation.state === "loading";
   const [isStreaming, setIsStreaming] = useState(false);
   const onMessageComplete = useEffectEvent(() => {
-    console.log("message complete", message);
     setIsStreaming(false);
   });
+  useEffect(() => {
+    if (!isStreaming && !isTouch()) {
+      inputRef.current?.focus();
+    }
+  }, [isStreaming])
   const { message, resetMessage } = useChatCompletionStream(onMessageComplete);
   const [context, setContext] = useState<Context>([]);
   const submit = useSubmit();
@@ -128,6 +133,7 @@ export default function Index() {
           autoComplete="off"
         >
           <input
+            ref={inputRef}
             type="text"
             name="command"
             autoFocus
@@ -158,4 +164,8 @@ export function useEffectEvent(fn: (...args: any[]) => void) {
     const f = ref.current;
     return f?.(...args);
   }, []);
+}
+
+function isTouch() {
+  return matchMedia("(hover: none)").matches;
 }
