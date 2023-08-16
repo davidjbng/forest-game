@@ -21,7 +21,6 @@ export async function loader({ request }: LoaderArgs) {
 
           for await (const chunk of completion.message) {
             if (request.signal.aborted) {
-              completion.message.controller.abort();
               return;
             }
             controller.enqueue(encoder.encode("event: message\n"));

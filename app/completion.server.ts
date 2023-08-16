@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 export type ChatCompletionMessage =
-  OpenAI.Chat.Completions.CompletionCreateParams.CreateChatCompletionRequestNonStreaming.Message;
+  OpenAI.Chat.Completions.ChatCompletionMessage;
 
 export async function getCompletion(
   query: string,
