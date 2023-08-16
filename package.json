@@ -4,8 +4,10 @@
   "scripts": {
     "build": "remix build",
     "dev": "remix dev",
+    "deploy": "fly deploy --remote-only",
     "start": "remix-serve build",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "tsc": "tsc"
   },
   "dependencies": {
     "@remix-run/css-bundle": "^1.18.0",
@@ -13,7 +15,7 @@
     "@remix-run/react": "^1.18.0",
     "@remix-run/serve": "^1.18.0",
     "isbot": "^3.6.8",
-    "openai": "4.0.0-beta.2",
+    "openai": "4.0.0-beta.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "remix": "^1.18.1"
@@ -22,6 +24,7 @@
     "@remix-run/dev": "^1.18.0",
     "@remix-run/eslint-config": "^1.18.0",
     "@tailwindcss/forms": "^0.5.3",
+    "@types/node": "18",
     "@types/react": "^18.0.35",
     "@types/react-dom": "^18.0.11",
     "eslint": "^8.38.0",

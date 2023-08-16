@@ -1,20 +1,23 @@
 import OpenAI from "openai";
 
-export type ChatCompletionMesssage =
-  OpenAI.Chat.Completions.CompletionCreateParams.CreateChatCompletionRequestNonStreaming.Message;
+export type ChatCompletionMessage =
+  OpenAI.Chat.Completions.ChatCompletionMessage;
 
 export async function getCompletion(
   query: string,
-  context: ChatCompletionMesssage[] = []
-): Promise<GetCompletion> {
+  context: ChatCompletionMessage[] = [],
+  signal?: AbortSignal
+) {
   try {
     const model = new OpenAI();
-    const completion = await model.chat.completions.create({
-      model: "gpt-3.5-turbo-0613",
-      messages: [
-        {
-          role: "system",
-          content: `You are a text based game. 
+    const response = await model.chat.completions.create(
+      {
+        model: "gpt-4",
+        stream: true,
+        messages: [
+          {
+            role: "system",
+            content: `You are a text based game. 
           Where the user tries to escape the forest.
           The user will give you instructions what to do,
           you will answer with a description of the new surrounding.
@@ -47,21 +50,24 @@ export async function getCompletion(
 
           Start Game:
           `,
-        },
-        ...context,
-        {
-          role: "user",
-          content: query,
-        },
-      ],
-    });
+          },
+          ...context,
+          {
+            role: "user",
+            content: query,
+          },
+        ],
+      },
+      {
+        signal,
+      }
+    );
 
-    const response = completion.choices[0]?.message?.content;
-    return response ? { success: true, message: response } : { success: false };
+    return response
+      ? ({ success: true, message: response } as const)
+      : ({ success: false } as const);
   } catch (error) {
     console.error(error);
-    return { success: false };
+    return { success: false } as const;
   }
 }
-
-type GetCompletion = { success: true; message: string } | { success: false };
